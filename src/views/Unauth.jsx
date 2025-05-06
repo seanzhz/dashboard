@@ -1,9 +1,9 @@
 import React from 'react';
 
-function Unauth(props) {
+function Unauth() {
     return (
         <div>
-            <h1>Unauthorized</h1>
+            <h1>Unauthorized, please log in</h1>
         </div>
     );
 }
