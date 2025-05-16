@@ -1,14 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
-import {updateUser} from "../../store/Reducers/authReducer";
+import {messageClear, updateAccount, updateUser} from "../../store/Reducers/authReducer";
+import toast from "react-hot-toast";
 
 
 function Profile() {
 
     const dispatch = useDispatch();
     const {userInfo} = useSelector((state) => state.auth);
+    const { loader, errorMessage, successMessage } = useSelector(state => state.auth);
 
-    // 用户信息部分状态（只包含只读信息和可编辑信息）
+    // User information editable and readable
     const [profile, setProfile] = useState({
         userId: '',         // 只读信息
         status: '',           // 只读信息
@@ -19,9 +21,10 @@ function Profile() {
         contact: ""     // 可编辑信息：店铺名称
     });
 
-    // 账号设置部分状态
+    // Account part
     const [account, setAccount] = useState({
         email: '',
+        oldPassword: '',
         newPassword: '',
         confirmPassword: ''
     });
@@ -29,12 +32,12 @@ function Profile() {
     useEffect(() => {
         if (userInfo) {
             setProfile({
-                userId: userInfo._id,         // 只读信息
-                status: userInfo.status,           // 只读信息
-                role: userInfo.role,              // 只读信息
-                image: userInfo.image, // 可编辑信息：头像
-                username: userInfo.username,           // 可编辑信息：姓名
-                contact: userInfo.contact     // 可编辑信息：店铺名称
+                userId: userInfo._id,         // read
+                status: userInfo.status,           // read
+                role: userInfo.role,              // read
+                image: userInfo.image, // edit
+                username: userInfo.username,           // edit
+                contact: userInfo.contact     // edit
             })
             setAccount({
                 ...account,
@@ -43,8 +46,19 @@ function Profile() {
         }
     }, [userInfo]);
 
+    useEffect(() => {
+        if (errorMessage) {
+            toast.error(errorMessage);
+            dispatch(messageClear());
+        }
+        if (successMessage) {
+            toast.success(successMessage);
+            dispatch(messageClear());
+        }
+    }, [errorMessage, successMessage]);
 
-    // 处理用户信息（头像、姓名、店铺名称）的改变
+
+    // process profile changes
     const handleProfileChange = (e) => {
         const {name, value, files} = e.target;
 
@@ -52,15 +66,15 @@ function Profile() {
             const file = files[0];
             setProfile(prev => ({
                 ...prev,
-                imageFile: file,                         // 给后端用
-                image: URL.createObjectURL(file)         // 给前端预览用
+                imageFile: file,                         // For backend use
+                image: URL.createObjectURL(file)         // For frontend view
             }));
         } else {
             setProfile(prev => ({...prev, [name]: value}));
         }
     };
 
-    // 用户信息更新提交处理
+    // submit
     const handleProfileUpdate = (e) => {
         e.preventDefault();
         const formData = new FormData();
@@ -69,14 +83,13 @@ function Profile() {
         formData.append('contact', profile.contact);
 
         if (profile.imageFile) {
-            formData.append('image', profile.imageFile);  // 🟢 变量名必须叫 image，和后端一致
+            formData.append('image', profile.imageFile);
         }
 
-        // Debug 打印
+        // Debugging
         for (let pair of formData.entries()) {
             console.log(pair[0], pair[1]);
         }
-
         dispatch(updateUser({id: userInfo._id, formData}))
     };
 
@@ -94,11 +107,11 @@ function Profile() {
             alert('New password and confirmation do not match!');
             return;
         }
-        // 模拟更新操作：可将新密码更新后清空密码输入框
-        const updatedAccount = {...account, newPassword: '', confirmPassword: ''};
+        // Send to backend and clear all
+        console.log(account.newPassword);
+        dispatch(updateAccount({id: userInfo._id, oldPassword: account.oldPassword, newPassword: account.newPassword}))
+        const updatedAccount = {...account, password:'',newPassword: '', confirmPassword: ''};
         setAccount(updatedAccount);
-        console.log('Updated account settings:', updatedAccount);
-        alert('Account information updated! (查看 console.log 输出)');
     };
 
     return (
@@ -208,6 +221,20 @@ function Profile() {
                                 name="email"
                                 id="email"
                                 value={account.email}
+                                onChange={handleAccountChange}
+                                disabled
+                                className="w-full px-3 py-2 border border-theme-border rounded focus:outline-none bg-gray-50 text-theme-text"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="oldPassword" className="block text-sm font-medium mb-1">
+                                Old Password
+                            </label>
+                            <input
+                                type="password"
+                                name="oldPassword"
+                                id="oldPassword"
+                                value={account.oldPassword}
                                 onChange={handleAccountChange}
                                 className="w-full px-3 py-2 border border-theme-border rounded focus:outline-none bg-white text-theme-text"
                             />

@@ -133,12 +133,6 @@ const sellerRoutes = [
         status: 'active'
     },
     {
-        path: '/seller/dashboard/contact-customer/:customerId',
-        element: <ChatToCustomer/>,
-        role: 'seller',
-        status: 'active'
-    },
-    {
         path: '/seller/dashboard/contact-customer',
         element: <ChatToCustomer/>,
         role: 'seller',
@@ -176,6 +170,11 @@ const sellerRoutes = [
     {
         path: "/seller/product/:id",
         element: <ProductDetail/>,
+        role: 'seller',
+    },
+    {
+        path: "/seller/dashboard/contact-customer/:sellerId",
+        element: <ChatToCustomer/>,
         role: 'seller',
     }
 ]

@@ -78,6 +78,20 @@ export const updateUser = createAsyncThunk(
     }
 );
 
+export const updateAccount = createAsyncThunk(
+    'auth/updateAccount',
+    async ({id, newPassword,oldPassword}, {rejectWithValue, fulfillWithValue}) => {
+        try {
+            const {data} = await api.put(`/update-account/${id}`, {newPassword,oldPassword}, {
+                withCredentials: true,
+            });
+            return fulfillWithValue(data);
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 const returnRole = (token) => {
     if (token) {
         const decodedToken = jwtDecode(token)
@@ -173,6 +187,17 @@ export const authReducer = createSlice({
                 state.errorMessage = payload?.error;
             })
             .addCase(updateUser.pending, (state, {payload}) => {
+                state.loader = true;
+            })
+            .addCase(updateAccount.fulfilled, (state, {payload}) => {
+                state.loader = false;
+                state.successMessage = payload.message;
+            })
+            .addCase(updateAccount.rejected, (state, {payload}) => {
+                state.loader = false;
+                state.errorMessage = payload?.error;
+            })
+            .addCase(updateAccount.pending, (state, {payload}) => {
                 state.loader = true;
             })
 

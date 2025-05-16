@@ -106,7 +106,8 @@ function ProductDetail(props) {
                                     className="px-4 py-2 bg-theme-primary text-white rounded-md hover:bg-theme-hover transition"
                                     onClick={() => {
                                         // 在这里执行聊天逻辑，或者跳转聊天页
-                                        alert(`Start chatting with ${singleProduct.sellerId.username}`);
+                                        alert(`Start chatting with ${singleProduct.sellerId._id}`);
+                                        navigate(`/seller/dashboard/contact-customer/${singleProduct.sellerId._id}`);
                                     }}
                                 >
                                     Let’s Chat

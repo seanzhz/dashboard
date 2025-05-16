@@ -1,6 +1,19 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
+import {useParams} from "react-router-dom";
+import {useSelector} from "react-redux";
+import io from "socket.io-client";
+const socket = io('http://localhost:8080');
 
 function ChatToCustomer() {
+
+    const {sellerId} = useParams();
+    const {userInfo} = useSelector((state) => state.auth);
+    console.log("sellerID is: " + sellerId + "User ID is: " + userInfo._id);
+
+    useEffect(() => {
+        socket.emit('add_user', userInfo._id, userInfo);
+    },[])
+
     const chatContacts = [
         { id: 1, name: 'Alice', lastMessage: 'Hi there!', time: '10:30 AM' },
         { id: 2, name: 'Bob', lastMessage: 'How are you?', time: '9:45 AM' },
