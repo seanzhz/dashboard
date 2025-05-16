@@ -1,57 +1,104 @@
 import React, {useEffect, useState} from 'react';
 import {useParams} from "react-router-dom";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import io from "socket.io-client";
+import {addFriend, fetchMessages, sendMessage} from "../../store/Reducers/chatReducer";
 const socket = io('http://localhost:8080');
 
 function ChatToCustomer() {
-
     const {sellerId} = useParams();
     const {userInfo} = useSelector((state) => state.auth);
-    console.log("sellerID is: " + sellerId + "User ID is: " + userInfo._id);
+    const {friend_messages, currentFriend, my_friends} = useSelector((state) => state.chat);
+    const dispatch = useDispatch();
+    const [selectedContact, setSelectedContact] = useState(null);
+
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+
+    const [searchQuery, setSearchQuery] = useState('');
+
 
     useEffect(() => {
         socket.emit('add_user', userInfo._id, userInfo);
-    },[])
+    }, []);
 
-    const chatContacts = [
-        { id: 1, name: 'Alice', lastMessage: 'Hi there!', time: '10:30 AM' },
-        { id: 2, name: 'Bob', lastMessage: 'How are you?', time: '9:45 AM' },
-        { id: 3, name: 'Charlie', lastMessage: 'See you soon', time: 'Yesterday' },
-    ];
+    useEffect(() => {
+        dispatch(addFriend({
+            sellerId: sellerId || "",
+            userId: userInfo._id,
+        }));
+    }, [sellerId]);
 
-    const initialMessages = {
-        1: [
-            { sender: 'Alice', content: 'Hi there!', time: '10:30 AM' },
-            { sender: 'You', content: 'Hello Alice!', time: '10:32 AM' },
-        ],
-        2: [
-            { sender: 'Bob', content: 'How are you?', time: '9:45 AM' },
-            { sender: 'You', content: "I'm good, thanks!", time: '9:46 AM' },
-        ],
-        3: [
-            { sender: 'Charlie', content: 'See you soon', time: 'Yesterday' },
-        ],
-    };
+//选中联系人后，拉取该联系人的历史对话记录
+    useEffect(() => {
+        if (selectedContact) {
+            dispatch(fetchMessages({
+                userId: userInfo._id,
+                friendId: selectedContact.id
+            }));
+        }
+    }, [selectedContact]);
+//当 Redux 中 friend_messages 更新时，同步到本地 state
+    useEffect(() => {
+        if (!selectedContact) return;
+        const msgs = friend_messages[selectedContact.id] || [];
+        setMessages(
+            msgs.map(m => ({
+                sender: m.senderId === userInfo._id ? 'You' : selectedContact.name,
+                content: m.message,
+                time:   new Date(m.createdAt).toLocaleTimeString(),
+            }))
+        );
+    }, [friend_messages, selectedContact]);
 
-    const [selectedContact, setSelectedContact] = useState(chatContacts[0]);
-    const [messages, setMessages] = useState(initialMessages[selectedContact.id] || []);
-    const [newMessage, setNewMessage] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
+    // 动态联系人列表
+    const contactList = my_friends.map((friend) => {
+        const message = friend_messages?.find?.((m) =>
+            m.senderId === friend.friendId || m.receiverId === friend.friendId
+        );
 
-    const filteredContacts = chatContacts.filter(contact =>
+        return {
+            id: friend.friendId,
+            name: friend.name,
+            lastMessage: message?.content || '',
+            time: message?.time || '',
+        };
+    });
+
+    // 默认选择第一个联系人
+    useEffect(() => {
+        if (contactList.length > 0 && !selectedContact) {
+            setSelectedContact(contactList[0]);
+            // TODO: 将此处替换为真正的历史消息加载逻辑
+            setMessages([]);
+        }
+    }, [contactList]);
+
+    // 搜索过滤
+    const filteredContacts = contactList.filter(contact =>
         contact.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const handleContactClick = (contact) => {
         setSelectedContact(contact);
-        setMessages(initialMessages[contact.id] || []);
+        // TODO: 加载该联系人的聊天记录
+        setMessages([]); // 先置空占位
     };
 
     const handleSendMessage = () => {
         if (newMessage.trim() === '') return;
         const newMsg = { sender: 'You', content: newMessage, time: 'Now' };
-        setMessages([...messages, newMsg]);
+
+        // ✅ 立即显示新消息
+        setMessages(prev => [...prev, newMsg]);
+
+        // ✅ 后端发送
+        dispatch(sendMessage({
+            userId: userInfo._id,
+            sellerId: selectedContact.id,
+            content: newMessage,
+        }));
+
         setNewMessage('');
     };
 
@@ -78,7 +125,7 @@ function ChatToCustomer() {
                                     key={contact.id}
                                     onClick={() => handleContactClick(contact)}
                                     className={`p-3 cursor-pointer rounded mb-2 hover:bg-theme-hover ${
-                                        selectedContact.id === contact.id ? 'bg-theme-hover font-semibold' : ''
+                                        selectedContact?.id === contact.id ? 'bg-theme-hover font-semibold' : ''
                                     }`}
                                 >
                                     <div className="font-bold">{contact.name}</div>
@@ -91,11 +138,13 @@ function ChatToCustomer() {
                     {/* 聊天区域 */}
                     <div className="flex-1 flex flex-col p-4 overflow-hidden bg-theme-bgSecondary min-h-[300px]">
                         <div className="mb-4 border-b border-theme-border pb-2">
-                            <h2 className="text-xl font-bold">Chat with {selectedContact.name}</h2>
+                            <h2 className="text-xl font-bold">
+                                {selectedContact ? `Chat with ${selectedContact.name}` : 'Select a contact to start'}
+                            </h2>
                         </div>
 
                         <div className="flex-1 overflow-auto space-y-3">
-                            {messages.map((msg, index) => (
+                            {messages.length > 0 ? messages.map((msg, index) => (
                                 <div
                                     key={index}
                                     className={`flex ${
@@ -112,7 +161,9 @@ function ChatToCustomer() {
                                         {msg.content}
                                     </div>
                                 </div>
-                            ))}
+                            )) : (
+                                <p className="text-gray-500">No messages yet.</p>
+                            )}
                         </div>
 
                         <div className="flex mt-4">
