@@ -53,7 +53,24 @@ export const chatReducer = createSlice({
         messageClear: (state, _) => {
             state.errorMessage = '';
             state.successMessage = '';
-        }
+        },
+        receiveMessage: (state, action) => {
+         // action.payload 应该是一个完整的 message 对象，例如：
+             // { messageId, senderId, receiverId, content, createdAt, … }
+                 const msg = action.payload;
+         const fid = msg.senderId;
+         if (!state.friend_messages[fid]) {
+               state.friend_messages[fid] = [];
+             }
+         // 把新的消息推到这个好友对应的消息数组末尾
+             state.friend_messages[fid].push({
+                   _id: msg.messageId,       // 或者 msg._id、看后端返回结构
+               senderId: msg.senderId,
+               receiverId: msg.receiverId,
+               message: msg.content,
+               createdAt: msg.createdAt
+         });
+       }
 
     },
     extraReducers: (builder) => {
@@ -83,13 +100,22 @@ export const chatReducer = createSlice({
                     state.friend_messages[fid] = [];
                 }
                 state.friend_messages[fid].push(msg);
+                const sentToFriend = state.my_friends.find(f => f.friendId === fid);
+                if (sentToFriend) {
+                       state.my_friends = state.my_friends.filter(f => f.friendId !== fid);
+                       state.my_friends.unshift(sentToFriend);
+                     }
                 state.successMessage = "Message sent successfully";
             })
 
             .addCase(fetchMessages.fulfilled, (state, {payload}) => {
                 const {friendId, messages} = payload;
                 state.friend_messages[friendId] = messages;
-            });
+            })
+            .addCase(sendMessage.rejected, (state, action) => {
+                  state.loader = false;
+                  state.errorMessage = action.payload?.error || action.error?.message || 'Send message failed';
+                });
     }
     // extraReducers: (builder) => {
     //     builder.addCase(addFriend.pending, (state, {payload}) => {
@@ -137,5 +163,5 @@ export const chatReducer = createSlice({
     // }
 })
 
-export const {messageClear} = chatReducer.actions;
+export const {messageClear,receiveMessage} = chatReducer.actions;
 export default chatReducer.reducer;
