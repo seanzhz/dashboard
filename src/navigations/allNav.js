@@ -1,10 +1,8 @@
-import {MdSpaceDashboard, MdDiscount, MdPayment, MdOutlineAddBox} from "react-icons/md";
+import {MdSpaceDashboard} from "react-icons/md";
 import {FaRegCreditCard, FaUser, FaUsersSlash} from "react-icons/fa";
 import {BiSolidCategory, BiUserVoice, BiSolidContact} from "react-icons/bi";
 import {IoChatbubblesSharp} from "react-icons/io5";
 import {RiCustomerService2Fill} from "react-icons/ri";
-import {BsCartCheck} from "react-icons/bs";
-import {AiFillProduct} from "react-icons/ai";
 import {FaCartShopping} from "react-icons/fa6";
 import {ImProfile} from "react-icons/im";
 import {FiShoppingBag} from "react-icons/fi";
@@ -67,22 +65,15 @@ export const allNav = [
         role: 'admin',
         path:'/admin/dashboard/seller-chat'
     },
-    {
-        id: 9,
-        title: 'Dashboard',
-        icon: <MdSpaceDashboard />,
-        role: 'seller',
-        path: '/seller/dashboard'
-    },
     // {
-    //     id: 10,
-    //     title: 'Add Product',
-    //     icon: <MdOutlineAddBox />,
+    //     id: 9,
+    //     title: 'Dashboard',
+    //     icon: <MdSpaceDashboard />,
     //     role: 'seller',
-    //     path: '/seller/dashboard/add-product'
+    //     path: '/seller/dashboard'
     // },
     {
-        id: 10,
+        id: 9,
         title: 'Market place',
         icon: <FiShoppingBag />,
         role: 'seller',
@@ -90,49 +81,28 @@ export const allNav = [
     },
 
     {
-        id: 11,
+        id: 10,
         title: 'My Post',
         icon: <TbHorseToy />,
         role: 'seller',
         path: '/seller/dashboard/products'
     },
-    // {
-    //     id: 12,
-    //     title: 'Discount Product',
-    //     icon: <MdDiscount />,
-    //     role: 'seller',
-    //     path: '/seller/dashboard/product-discount'
-    // },
-    // {
-    //     id: 13,
-    //     title: 'Order',
-    //     icon: <BsCartCheck />,
-    //     role: 'seller',
-    //     path: '/seller/dashboard/orders'
-    // },
-    // {
-    //     id: 14,
-    //     title: 'Payment',
-    //     icon: <MdPayment />,
-    //     role: 'seller',
-    //     path: '/seller/dashboard/payments'
-    // },
     {
-        id: 15,
+        id: 11,
         title: 'Contact Customer',
         icon: <RiCustomerService2Fill />,
         role: 'seller',
         path: '/seller/dashboard/contact-customer'
     },
     {
-        id: 16,
+        id: 12,
         title: 'Contact Admin',
         icon: <BiSolidContact />,
         role: 'seller',
         path: '/seller/dashboard/contact-admin'
     },
     {
-        id: 17,
+        id: 13,
         title: 'Profile',
         icon: <ImProfile />,
         role: 'seller',

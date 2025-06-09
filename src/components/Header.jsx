@@ -18,13 +18,13 @@ function Header({ showSideBar, setShowSideBar }) {
                 </div>
 
                 <div className="hidden md:block">
-                    <input
-                        type="text"
-                        placeholder="🔍Search"
-                        className="px-3 py-2 rounded-md outline-none border bg-theme-card
-                        border-theme-border text-theme-text placeholder-theme-subtext
-                        focus:border-theme-hover focus:bg-white"
-                    />
+                    {/*<input*/}
+                    {/*    type="text"*/}
+                    {/*    placeholder="🔍Search"*/}
+                    {/*    className="px-3 py-2 rounded-md outline-none border bg-theme-card*/}
+                    {/*    border-theme-border text-theme-text placeholder-theme-subtext*/}
+                    {/*    focus:border-theme-hover focus:bg-white"*/}
+                    {/*/>*/}
                 </div>
 
                 <div className="flex items-center justify-center gap-5 relative">

@@ -44,13 +44,13 @@ function Register() {
     return (
         <div className="flex justify-center items-center min-h-screen min-w-screen bg-theme-bg">
             <div className="bg-theme-card border border-theme-border shadow-lg rounded-lg p-8 w-96">
-                <h2 className="text-xl font-bold text-center mb-3 text-theme-text">Welcome to Online Shopping</h2>
+                <h2 className="text-xl font-bold text-center mb-3 text-theme-text">Welcome to Swappy</h2>
                 <h2 className="text-l font-semibold text-center mb-3 text-theme-subtext">Register your account</h2>
 
                 <form className="space-y-4" onSubmit={submitHandler}>
                     <div>
                         <label className="block text-theme-text text-sm font-semibold mb-1" htmlFor="username">
-                            Community Name
+                            Community Name (Not changeable)
                         </label>
                         <input
                             onChange={inputChangeHandler}
@@ -104,7 +104,7 @@ function Register() {
                             />
                             <span className="ml-2 text-sm text-theme-subtext">
                                 I agree to the
-                                <a href="/terms" className="text-theme-primary underline ml-1">terms and conditions</a>
+                                <a href="" className="text-theme-primary underline ml-1">terms and conditions</a>
                             </span>
                         </label>
                     </div>

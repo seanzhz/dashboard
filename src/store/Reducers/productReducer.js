@@ -18,6 +18,21 @@ export const addProduct = createAsyncThunk(
     }
 );
 
+// 新增：获取公开预览的 4 条商品
+export const getPreviewProducts = createAsyncThunk(
+    'product/getPreviewProducts',
+    async (_, { rejectWithValue, fulfillWithValue }) => {
+        try {
+            // 直接请求 /preview-products，不带认证
+            const { data } = await api.get('/preview-products');
+            // data = { products, page, limit, total, totalPages }
+            return fulfillWithValue(data.products);
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { error: error.message });
+        }
+    }
+);
+
 export const getCorrespondingProduct = createAsyncThunk(
     'product/getCorrespondingProduct',
     async (_, { rejectWithValue, fulfillWithValue }) => {
@@ -101,7 +116,10 @@ export const productReducer = createSlice({
             limit: 12,
             total: 0,
             totalPages: 0,
-        }
+        },
+        previewProducts: [], // ← 新增：存储登录页的 4 条预览
+        previewLoading: false,
+        previewError: null
     },
     reducers: {
         messageClear: (state,_) => {
@@ -176,6 +194,19 @@ export const productReducer = createSlice({
             })
             .addCase(getAllProducts.pending, (state, { payload }) => {
                 state.loader = true;
+            })
+        /* ===== 新增 getPreviewProducts 的处理 ===== */
+    .addCase(getPreviewProducts.pending, (state) => {
+            state.previewLoading = true;
+            state.previewError = null;
+        })
+            .addCase(getPreviewProducts.fulfilled, (state, { payload }) => {
+                state.previewLoading = false;
+                state.previewProducts = payload; // 存储 4 条商品
+            })
+            .addCase(getPreviewProducts.rejected, (state, { payload }) => {
+                state.previewLoading = false;
+                state.previewError = payload?.error || 'Failed to load preview products';
             });
 
     }

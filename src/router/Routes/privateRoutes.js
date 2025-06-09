@@ -12,7 +12,6 @@ import OrderDetail from "../../views/admin/OrderDetail";
 import SellerDashboard from "../../views/seller/SellerDashboard";
 import AddProduct from "../../views/seller/AddProduct";
 import Product from "../../views/seller/Product";
-import DiscountProduct from "../../views/seller/DiscountProduct";
 import Orders from "../../views/seller/Orders";
 import Payments from "../../views/seller/Payments";
 import ChatToCustomer from "../../views/seller/ChatToCustomer";
@@ -105,12 +104,6 @@ const sellerRoutes = [
     {
         path: '/seller/dashboard/edit-product/:productId',
         element: <EditProduct/>,
-        role: 'seller',
-        status: 'active'
-    },
-    {
-        path: '/seller/dashboard/product-discount',
-        element: <DiscountProduct/>,
         role: 'seller',
         status: 'active'
     },

@@ -12,13 +12,13 @@ function Profile() {
 
     // User information editable and readable
     const [profile, setProfile] = useState({
-        userId: '',         // 只读信息
-        status: '',           // 只读信息
-        role: '',              // 只读信息
+        userId: '',         // Read
+        status: '',           // Read
+        role: '',              // Read
         image: '',             // 预览 URL（前端展示）
         imageFile: null,
-        username: '',           // 可编辑信息：姓名
-        contact: ""     // 可编辑信息：店铺名称
+        username: '',           // currently: read only //TODO: will be changeable in furture
+        contact: ""     // edit
     });
 
     // Account part
@@ -78,29 +78,26 @@ function Profile() {
     const handleProfileUpdate = (e) => {
         e.preventDefault();
         const formData = new FormData();
-
         formData.append('username', profile.username);
         formData.append('contact', profile.contact);
-
         if (profile.imageFile) {
             formData.append('image', profile.imageFile);
         }
-
-        // Debugging
-        for (let pair of formData.entries()) {
-            console.log(pair[0], pair[1]);
-        }
+        // // Debugging
+        // for (let pair of formData.entries()) {
+        //     console.log(pair[0], pair[1]);
+        // }
         dispatch(updateUser({id: userInfo._id, formData}))
     };
 
 
-    // 处理账号设置（邮箱、密码）的改变
+    // Process change of email and password
     const handleAccountChange = (e) => {
         const {name, value} = e.target;
         setAccount(prev => ({...prev, [name]: value}));
     };
 
-    // 账号设置更新提交处理
+
     const handleAccountUpdate = (e) => {
         e.preventDefault();
         if (account.newPassword !== account.confirmPassword) {
@@ -108,7 +105,7 @@ function Profile() {
             return;
         }
         // Send to backend and clear all
-        console.log(account.newPassword);
+        //console.log(account.newPassword);
         dispatch(updateAccount({id: userInfo._id, oldPassword: account.oldPassword, newPassword: account.newPassword}))
         const updatedAccount = {...account, password:'',newPassword: '', confirmPassword: ''};
         setAccount(updatedAccount);
@@ -120,11 +117,11 @@ function Profile() {
                 <h1 className="text-2xl font-bold">Profile</h1>
             </div>
             <div className="w-full p-4 bg-theme-bgSecondary rounded-md border border-theme-border space-y-6">
-                {/* 第一部分：用户信息 */}
+                {/* 1. User profile information */}
                 <div>
                     <h2 className="text-xl font-bold mb-4">User Information</h2>
 
-                    {/* 1.1 只读信息展示 */}
+                    {/* 1.1 Read part display */}
                     <div className="mb-6">
                         <h3 className="text-lg font-semibold mb-2">Account Details</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -143,7 +140,7 @@ function Profile() {
                         </div>
                     </div>
 
-                    {/* 1.2 可编辑信息 */}
+                    {/* 1.2 Editable information display */}
                     <div>
                         <h3 className="text-lg font-semibold mb-2">Edit Profile</h3>
                         <form onSubmit={handleProfileUpdate} className="space-y-4">
@@ -174,12 +171,13 @@ function Profile() {
                                     Name
                                 </label>
                                 <input
+                                    disabled
                                     type="text"
                                     name="username"
                                     id="username"
                                     value={profile.username}
                                     onChange={handleProfileChange}
-                                    className="w-full px-3 py-2 border border-theme-border rounded focus:outline-none bg-white text-theme-text"
+                                    className="w-full px-3 py-2 border border-theme-border rounded focus:outline-none bg-gray-100 text-theme-text"
                                 />
                             </div>
                             <div>
@@ -208,7 +206,7 @@ function Profile() {
 
                 <hr className="border-t border-theme-border mt-6"/>
 
-                {/* 第二部分：账号设置 */}
+                {/* 2. Account information */}
                 <div>
                     <h2 className="text-xl font-bold mb-4">Account Settings</h2>
                     <form onSubmit={handleAccountUpdate} className="space-y-4">
