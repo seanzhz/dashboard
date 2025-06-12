@@ -4,31 +4,39 @@ import {useDispatch, useSelector} from "react-redux";
 import io from "socket.io-client";
 import {addFriend, fetchMessages, sendMessage, receiveMessage} from "../../store/Reducers/chatReducer";
 
-//Connect socket Io
+// Connect socket.io
 const socket = io('http://localhost:8080');
 
+/**
+ * ChatToCustomer component
+ * Enables real-time chat between current user and customers (seller <-> customer).
+ */
 function ChatToCustomer() {
     const {sellerId} = useParams();
 
-    //Get current user's chat state from Redux
+    // Get current user's chat state from Redux
     const {userInfo} = useSelector((state) => state.auth);
     const {friend_messages, currentFriend, my_friends} = useSelector((state) => state.chat);
     const dispatch = useDispatch();
 
-    //local state：selected contact、当前消息列表、输入框内容、搜索关键字
+    // Local state: selected contact, messages, input field, search query
     const [selectedContact, setSelectedContact] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
 
-
-    //第一次组件加载时，把自己“添加”到在线列表，后端会拿到这个 socket.id
+    /**
+     * Add self to socket.io online list on mount.
+     */
     useEffect(() => {
         if (userInfo?._id) {
-            socket.emit('add_user', userInfo._id, userInfo);}
+            socket.emit('add_user', userInfo._id, userInfo);
+        }
     }, [userInfo]);
 
-    //URL param（sellerId）变化时，调用 addFriend 拿到联系人列表
+    /**
+     * On URL param sellerId change, trigger addFriend to get contact list.
+     */
     useEffect(() => {
         dispatch(addFriend({
             sellerId: sellerId || "",
@@ -36,7 +44,9 @@ function ChatToCustomer() {
         }));
     }, [sellerId, userInfo, dispatch]);
 
-    //选中联系人后，拉取该联系人的历史对话记录
+    /**
+     * When selectedContact changes, fetch its chat history.
+     */
     useEffect(() => {
         if (selectedContact) {
             dispatch(fetchMessages({
@@ -46,7 +56,9 @@ function ChatToCustomer() {
         }
     }, [selectedContact, userInfo, dispatch]);
 
-    //当 Redux 中 friend_messages 更新后，把对应 contact 的历史映射到本地 messages
+    /**
+     * When Redux friend_messages updates, map to local messages state.
+     */
     useEffect(() => {
         if (!selectedContact) return;
         const msgs = friend_messages[selectedContact.id] || [];
@@ -54,17 +66,23 @@ function ChatToCustomer() {
             msgs.map(m => ({
                 sender: m.senderId === userInfo._id ? 'You' : selectedContact.name,
                 content: m.message,
-                time:   new Date(m.createdAt).toLocaleTimeString(),
+                time: new Date(m.createdAt).toLocaleTimeString(),
             }))
         );
     }, [friend_messages, selectedContact, userInfo]);
 
-
+    /**
+     * Socket.io message receiver.
+     * Handles:
+     * 1. Append message to local if chatting with sender.
+     * 2. Sync message into Redux friend_messages.
+     * 3. Auto-fetch messages if sender not currently selected.
+     */
     useEffect(() => {
         const handleReceive = (data) => {
             // data = { messageId, senderId, receiverId, content, createdAt }
 
-            // 1) 如果这条消息正好发给“我”并且正在和发送者聊天，就先追加到本地 messages
+            // 1) Append message if chatting with sender
             if (
                 data.receiverId === userInfo._id &&
                 selectedContact &&
@@ -79,7 +97,7 @@ function ChatToCustomer() {
                 setMessages(prev => [...prev, incoming]);
             }
 
-            // 2) —— 新增：把收到的这条消息同步写入 Redux 的 friend_messages
+            // 2) Sync to Redux
             if (data.receiverId === userInfo._id) {
                 dispatch(receiveMessage({
                     messageId: data.messageId,
@@ -90,7 +108,7 @@ function ChatToCustomer() {
                 }));
             }
 
-            // 3) 如果“对方给我发消息”但“当前没和他聊天”，就 fetch 一次历史
+            // 3) Auto-fetch if not chatting with sender
             if (
                 data.receiverId === userInfo._id &&
                 (!selectedContact || data.senderId !== selectedContact.id)
@@ -108,12 +126,12 @@ function ChatToCustomer() {
         };
     }, [selectedContact, userInfo, dispatch]);
 
-    // 根据 Redux 的 my_friends 和 friend_messages 生成联系人列表，并过滤掉自己
+    /**
+     * Build contact list from my_friends and friend_messages.
+     */
     const contactList = my_friends
-        // 过滤掉好友 ID 等于当前用户 ID 的那条
         .filter(friend => friend.friendId !== userInfo._id)
         .map((friend) => {
-            // 下面保持原来的逻辑
             const message = friend_messages?.find?.((m) =>
                 m.senderId === friend.friendId || m.receiverId === friend.friendId
             );
@@ -126,35 +144,48 @@ function ChatToCustomer() {
             };
         });
 
-    // 默认选择第一个联系人
+    /**
+     * Auto-select first contact on first load.
+     */
     useEffect(() => {
         if (contactList.length > 0 && !selectedContact) {
             setSelectedContact(contactList[0]);
-            // TODO: 将此处替换为真正的历史消息加载逻辑
-            setMessages([]);
+            dispatch(fetchMessages({
+                userId: userInfo._id,
+                friendId: contactList[0].id // FIXME: should be contactList[0].id
+            }));
         }
-    }, [contactList, selectedContact]);
+    }, [contactList, selectedContact, dispatch, userInfo._id]);
 
-    // 搜索过滤
+    /**
+     * Search filter for contacts.
+     */
     const filteredContacts = contactList.filter(contact =>
         contact.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    /**
+     * Select contact handler.
+     */
     const handleContactClick = (contact) => {
         setSelectedContact(contact);
-        // TODO: 加载该联系人的聊天记录
-        setMessages([]); // 先置空占位
+        dispatch(fetchMessages({
+            userId: userInfo._id,
+            friendId: contact.id
+        }));
     };
 
-    //发送消息逻辑：先本地追加“占位”，再发给后端
+    /**
+     * Send message handler.
+     */
     const handleSendMessage = () => {
         if (newMessage.trim() === '') return;
-        const newMsg = { sender: 'You', content: newMessage, time: 'Now' };
 
-        // ✅ 立即显示新消息
+        // 1) Append locally
+        const newMsg = { sender: 'You', content: newMessage, time: 'Now' };
         setMessages(prev => [...prev, newMsg]);
 
-        // ✅ 后端发送
+        // 2) Dispatch to backend
         dispatch(sendMessage({
             userId: userInfo._id,
             sellerId: selectedContact.id,
@@ -169,7 +200,7 @@ function ChatToCustomer() {
             <h1 className="text-2xl font-bold mb-3">Chat Board</h1>
             <div className="w-full p-4 bg-theme-bgSecondary rounded-md border border-theme-border">
                 <div className="flex flex-col lg:flex-row h-[500px]">
-                    {/* 联系人列表 */}
+                    {/* Contact list */}
                     <div className="w-full lg:w-1/3 border-r border-theme-border p-4 overflow-auto bg-theme-bgSecondary max-h-[250px] lg:max-h-none">
                         <h2 className="text-xl font-bold mb-4">Customers</h2>
                         <div className="mb-4">
@@ -197,7 +228,7 @@ function ChatToCustomer() {
                         </ul>
                     </div>
 
-                    {/* 聊天区域 */}
+                    {/* Chat area */}
                     <div className="flex-1 flex flex-col p-4 overflow-hidden bg-theme-bgSecondary min-h-[300px]">
                         <div className="mb-4 border-b border-theme-border pb-2">
                             <h2 className="text-xl font-bold">

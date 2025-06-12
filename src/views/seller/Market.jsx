@@ -5,19 +5,28 @@ import {getAllProducts} from '../../store/Reducers/productReducer';
 import {getCategory} from "../../store/Reducers/categoryReducer";
 import ProductCard from "./ProductCard";
 
-
+/**
+ * Market component
+ * Displays a marketplace with filtering, search, and pagination.
+ * Allows filtering by category, sell/exchange type, and search query.
+ */
 const Market = () => {
     const dispatch = useDispatch();
+
+    // Redux state
     const {products, pagination, loader} = useSelector(state => state.product);
     const {categories} = useSelector(state => state.category);
+
+    // Component state
     const [currentPage, setCurrentPage] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [selectedSell, setSelectedSell] = useState(true);
     const [selectedExchange, setSelectedExchange] = useState(true);
     const limit = 8;
-    let content = null;
 
+    // Product content rendering
+    let content = null;
     if (loader) {
         content = <p className="text-gray-600">Loading...</p>;
     } else if (products.length === 0) {
@@ -28,8 +37,9 @@ const Market = () => {
         ));
     }
 
+    // Load categories and products
     useEffect(() => {
-        dispatch(getCategory())
+        dispatch(getCategory());
         dispatch(getAllProducts({
             page: currentPage + 1,
             limit,
@@ -38,8 +48,7 @@ const Market = () => {
             sell: selectedSell,
             exchange: selectedExchange
         }));
-    }, [dispatch, currentPage, selectedCategory, searchQuery, selectedExchange,selectedSell]);
-
+    }, [dispatch, currentPage, selectedCategory, searchQuery, selectedExchange, selectedSell]);
 
     return (
         <div className="p-4 max-w-6xl mx-auto">
@@ -48,17 +57,19 @@ const Market = () => {
                 <h1 className="text-2xl font-bold">Marketplace</h1>
 
                 <div className="flex gap-2 w-full md:w-auto">
-                  <div className="flex items-center space-x-1">
-                            <span className="text-sm font-semibold">Sell</span>
-                      <input
-                          type="checkbox"
-                          name="sell"
-                          checked={selectedSell}
-                          onChange={() => setSelectedSell(prev => !prev)}
-                          className="form-checkbox h-5 w-5 text-theme-primary"
-                      />
-                  </div>
+                    {/* Sell checkbox */}
+                    <div className="flex items-center space-x-1">
+                        <span className="text-sm font-semibold">Sell</span>
+                        <input
+                            type="checkbox"
+                            name="sell"
+                            checked={selectedSell}
+                            onChange={() => setSelectedSell(prev => !prev)}
+                            className="form-checkbox h-5 w-5 text-theme-primary"
+                        />
+                    </div>
 
+                    {/* Exchange checkbox */}
                     <div className="flex items-center space-x-1 ml-3">
                         <span className="text-sm font-semibold">Exchange</span>
                         <input
@@ -70,11 +81,12 @@ const Market = () => {
                         />
                     </div>
 
+                    {/* Category select */}
                     <select
                         value={selectedCategory}
                         onChange={(e) => {
                             setSelectedCategory(e.target.value);
-                            setCurrentPage(0);
+                            setCurrentPage(0); // Reset page on filter change
                         }}
                         className="border p-2 rounded text-sm"
                     >
@@ -86,12 +98,13 @@ const Market = () => {
                         ))}
                     </select>
 
+                    {/* Search input */}
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={e => {
                             setSearchQuery(e.target.value);
-                            setCurrentPage(0);
+                            setCurrentPage(0); // Reset page on search
                         }}
                         placeholder="Search products..."
                         className="border p-2 rounded text-sm"
@@ -115,7 +128,7 @@ const Market = () => {
                         }
                         nextLabel={
                             <button className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-md shadow-sm hover:bg-gray-100 transition">
-                                >
+                                {">"}
                             </button>
                         }
                         pageRangeDisplayed={3}

@@ -13,7 +13,7 @@ function ProtectedRoute({route, children}) {
         return <Suspense fallback={null}>{children}</Suspense>;
     }
 
-    if (role === "seller") {
+    if (role === "user") {
         // if (userInfo) {
         //     if (userInfo.role === route.role) {
         //         if (route.state) {
@@ -38,7 +38,7 @@ function ProtectedRoute({route, children}) {
         console.log(userInfo)
         if (userInfo.role === route.role) {
         return <Suspense fallback={null}>{children}</Suspense>;}
-        else {<Navigate to='/seller/account-pending1' replace />}
+        else {<Navigate to='/user/account-pending1' replace />}
     } else {
         return <Navigate to="/login" replace />;
     }

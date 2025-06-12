@@ -1,30 +1,44 @@
-// src/pages/Login.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { PropagateLoader } from "react-spinners";
 import { useDispatch, useSelector } from "react-redux";
-import { messageClear, sellerLogin } from "../../store/Reducers/authReducer";
+import { messageClear, userLogin } from "../../store/Reducers/authReducer";
 import { getPreviewProducts } from "../../store/Reducers/productReducer";
 import toast from "react-hot-toast";
 
+/**
+ * Login component
+ * User login form with left side product preview (4 latest products).
+ */
 function Login() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
     const { loader, errorMessage, successMessage } = useSelector(state => state.auth);
     const { previewProducts, previewLoading, previewError } = useSelector(state => state.product);
 
+    // Local form state
     const [user, setUser] = useState({ email: "", password: "" });
 
+    /**
+     * Generic input change handler.
+     */
     const inputChangeHandler = (e) => {
         setUser({ ...user, [e.target.name]: e.target.value });
     };
 
+    /**
+     * Form submit handler.
+     */
     const submitHandler = (e) => {
         e.preventDefault();
-        dispatch(sellerLogin(user));
+        dispatch(userLogin(user));
     };
 
+    /**
+     * Handle success/error toast after login.
+     */
     useEffect(() => {
         if (errorMessage) {
             toast.error(errorMessage);
@@ -37,13 +51,16 @@ function Login() {
         }
     }, [errorMessage, successMessage, dispatch, navigate]);
 
+    /**
+     * Load preview products on mount.
+     */
     useEffect(() => {
         dispatch(getPreviewProducts());
     }, [dispatch]);
 
     return (
         <div className="flex min-h-screen w-full bg-theme-bg">
-            {/* 左侧 70% 区域：Logo + 前 4 条商品预览 */}
+            {/* Left side 70%: Logo + previewProducts */}
             <div className="w-[70%] flex flex-col p-8">
                 <div className="mb-8 flex flex-col items-start">
                     <img
@@ -59,6 +76,7 @@ function Login() {
                     </p>
                 </div>
 
+                {/* Product Preview */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
                     {previewLoading ? (
                         <div className="col-span-full flex justify-center items-center py-10">
@@ -98,7 +116,7 @@ function Login() {
                                         <h3 className="text-lg font-semibold text-theme-text truncate">
                                             {product.name}
                                         </h3>
-                                        <p className="mt-2 text-theme-subtext">${product.price?.toFixed(2)}</p>
+                                        <p className="mt-2 text-theme-subtext">$ ???</p>
                                         <p className="mt-1 text-sm text-gray-500 truncate">
                                             {product.description?.slice(0, 50) + (product.description?.length > 50 ? '…' : '')}
                                         </p>
@@ -109,6 +127,7 @@ function Login() {
                     )}
                 </div>
 
+                {/* Call to login link */}
                 <div className="mt-8 text-center">
                     <p className="text-theme-subtext">
                         To explore all products, please{" "}
@@ -124,13 +143,14 @@ function Login() {
 
             <div className="w-px bg-theme-border"></div>
 
-            {/* 右侧 30% 区域：登录表单 */}
+            {/* Right side 30%: Login Form */}
             <div className="w-[30%] flex justify-center items-center">
                 <div className="bg-theme-card shadow-lg border border-theme-border rounded-lg p-8 w-96">
                     <h2 className="text-xl font-bold text-center mb-3 text-theme-text">
                         Login to Your Account
                     </h2>
 
+                    {/* Login Form */}
                     <form className="space-y-4" onSubmit={submitHandler}>
                         <div>
                             <label
@@ -168,6 +188,7 @@ function Login() {
                             />
                         </div>
 
+                        {/* Submit button */}
                         <button
                             type="submit"
                             className="w-full bg-theme-primary text-white py-2 px-4 rounded hover:bg-theme-hover transition"
@@ -192,6 +213,7 @@ function Login() {
                         </p>
                     </form>
 
+                    {/* Social login placeholder */}
                     <div className="flex items-center my-4">
                         <hr className="flex-grow border-theme-border" />
                         <span className="mx-2 text-theme-subtext">OR</span>

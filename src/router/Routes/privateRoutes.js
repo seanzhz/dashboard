@@ -9,16 +9,12 @@ import SellerRequest from "../../views/admin/SellerRequest";
 import SellerDetails from "../../views/admin/SellerDetails";
 import SellerChat from "../../views/admin/SellerChat";
 import OrderDetail from "../../views/admin/OrderDetail";
-import SellerDashboard from "../../views/seller/SellerDashboard";
 import AddProduct from "../../views/seller/AddProduct";
 import Product from "../../views/seller/Product";
-import Orders from "../../views/seller/Orders";
-import Payments from "../../views/seller/Payments";
 import ChatToCustomer from "../../views/seller/ChatToCustomer";
 import ChatToAdmin from "../../views/seller/ChatToAdmin";
 import Profile from "../../views/seller/Profile";
 import EditProduct from "../../views/seller/EditProduct";
-import OrderDetail_Seller from "../../views/seller/OrderDetail-Seller";
 import ViewProduct from "../../views/seller/ViewProduct";
 import Market from "../../views/seller/Market";
 import ProductDetail from "../../views/seller/ProductDetail";
@@ -76,101 +72,77 @@ const adminRoutes = [
     }
 ];
 
-const sellerRoutes = [
+const userRoutes = [
     {
         path: '/',
         element:<Home/>,
-        role: ['admin', 'seller']
+        role: ['admin', 'user']
     },
     {
-        path: '/seller/dashboard',
-        element:<SellerDashboard/>,
-        role: 'seller',
-        status: 'active'
-    },
-    {
-        path: '/seller/dashboard/products',
+        path: '/products',
         element:<Product/>,
-        role: 'seller',
+        role: 'user',
         status: 'active'
     },
     {
-        path: '/seller/dashboard/add-product',
+        path: '/add-product',
         element: <AddProduct/>,
-        role: 'seller',
+        role: 'user',
         status: 'active'
     }
     ,
     {
-        path: '/seller/dashboard/edit-product/:productId',
+        path: '/edit-product/:productId',
         element: <EditProduct/>,
-        role: 'seller',
+        role: 'user',
         status: 'active'
     },
     {
-        path: '/seller/dashboard/orders',
-        element: <Orders/>,
-        role: 'seller',
-        visibility: ['active','inactive']
-    },
-    {
-        path: '/seller/dashboard/orders/:orderId',
-        element: <OrderDetail_Seller/>,
-        role: 'seller',
-        visibility: ['active','inactive']
-    },
-    {
-        path: '/seller/dashboard/payments',
-        element: <Payments/>,
-        role: 'seller',
-        status: 'active'
-    },
-    {
-        path: '/seller/dashboard/contact-customer',
+        path: '/contact-customer',
         element: <ChatToCustomer/>,
-        role: 'seller',
+        role: 'user',
         status: 'active'
     },
     {
-        path: '/seller/dashboard/contact-admin',
+        path: '/contact-admin',
         element: <ChatToAdmin/>,
-        role: 'seller',
+        role: 'user',
         visibility: ['active','inactive','pending']
     },
     {
-        path: '/seller/dashboard/profile',
+        path: '/profile',
         element: <Profile/>,
-        role: 'seller',
+        role: 'user',
         status: 'active'
     },
     {
-        path: "/seller/dashboard/products/:id",
+        path: "/products/:id",
         element: <ViewProduct/>,
-        role: 'seller',
+        role: 'user',
         status: 'active'
     },
     {
-        path: "/seller/dashboard/edit-product/:productId",
+        path: "/edit-product/:productId",
         element: <EditProduct/>,
-        role: 'seller',
+        role: 'user',
         status: 'active'
     },
     {
-        path: "/seller/dashboard/market",
+        path: "/market",
         element: <Market/>,
-        role: 'seller',
+        role: 'user',
     },
     {
-        path: "/seller/product/:id",
+        path: "/product/:id",
         element: <ProductDetail/>,
-        role: 'seller',
+        role: 'user',
     },
     {
-        path: "/seller/dashboard/contact-customer/:sellerId",
+        path: "/contact-customer/:sellerId",
         element: <ChatToCustomer/>,
-        role: 'seller',
+        role: 'user',
     }
 ]
 
 
-export const privateRoutes = [...adminRoutes, ...sellerRoutes];
+export const privateRoutes = [...adminRoutes, ...userRoutes];

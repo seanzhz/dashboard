@@ -6,15 +6,24 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import {PropagateLoader} from "react-spinners";
 
+/**
+ * AddProduct component
+ * Form for adding a new product to the marketplace.
+ */
 function AddProduct() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const { categories } = useSelector(state => state.category);
     const { loader, successMessage, errorMessage } = useSelector(state => state.product);
+
+    // Submission control
     const [submitted, setSubmitted] = useState(false);
 
+    // Product images state (new upload)
     const [productImages, setProductImages] = useState([]);
+
+    // Product form state
     const [product, setProduct] = useState({
         name: "",
         description: "",
@@ -27,11 +36,17 @@ function AddProduct() {
         isSecret: false,
     });
 
+    /**
+     * Load categories on mount.
+     */
     useEffect(() => {
         dispatch(getCategory());
         dispatch(messageClear());
     }, [dispatch]);
 
+    /**
+     * Handle success/error toast after submission.
+     */
     useEffect(() => {
         if (!submitted) return;
 
@@ -45,10 +60,13 @@ function AddProduct() {
             toast.success(successMessage);
             dispatch(messageClear());
             setSubmitted(false);
-            //navigate("/seller/dashboard/products");
+            navigate("/products");
         }
     }, [successMessage, errorMessage, dispatch, navigate, submitted]);
 
+    /**
+     * Prevent invalid price inputs (max 2 decimal places).
+     */
     const priceCheck = (e) => {
         if (!/[0-9.]/.test(e.key) && !['Backspace', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
             e.preventDefault();
@@ -59,6 +77,9 @@ function AddProduct() {
             e.key !== 'Backspace') e.preventDefault();
     };
 
+    /**
+     * Generic input change handler.
+     */
     const inputChangeHandler = (e) => {
         const { name, value, type, checked } = e.target;
         setProduct(prev => ({
@@ -67,6 +88,9 @@ function AddProduct() {
         }));
     };
 
+    /**
+     * Handle image upload.
+     */
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
         const previews = files.map(file => ({
@@ -76,33 +100,45 @@ function AddProduct() {
         setProductImages(prev => [...prev, ...previews]);
     };
 
+    /**
+     * Handle form submission.
+     */
     const handleSubmit = (e) => {
         e.preventDefault();
+
         const formData = new FormData();
         Object.entries(product).forEach(([key, value]) => {
             formData.append(key, value);
         });
+
         productImages.forEach(img => {
             formData.append('images', img.file);
         });
+
         dispatch(addProduct(formData));
+
+        // Optional: debug output
         for (let pair of formData.entries()) {
             console.log(`${pair[0]}:`, pair[1]);
         }
+
         setSubmitted(true);
     };
 
     return (
         <div className='px-2 lg:px-7 pt-2 text-theme-text'>
             <h1 className="text-2xl font-bold mb-3">Add Product</h1>
+
             <div className="w-full p-4 bg-theme-card border border-theme-border rounded-md shadow-sm">
                 <form className="space-y-6" onSubmit={handleSubmit}>
+                    {/* Product Name */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Product Name</label>
                         <input type="text" name="name" value={product.name} onChange={inputChangeHandler}
                                className="w-full p-3 border rounded-lg bg-theme-bgSecondary text-theme-text border-theme-border" />
                     </div>
 
+                    {/* Product Description */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Product Description</label>
                         <textarea name="description" value={product.description} onChange={inputChangeHandler}
@@ -110,12 +146,14 @@ function AddProduct() {
                                   rows="4" />
                     </div>
 
+                    {/* Brand */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Brand Name</label>
                         <input type="text" name="brand" value={product.brand || ""} onChange={inputChangeHandler}
                                className="w-full p-3 border rounded-lg bg-theme-bgSecondary text-theme-text border-theme-border" />
                     </div>
 
+                    {/* Stock */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Stock</label>
                         <input type="number" name="stock" value={product.stock || ""} onChange={inputChangeHandler}
@@ -123,6 +161,7 @@ function AddProduct() {
                                className="w-full p-3 border rounded-lg bg-theme-bgSecondary text-theme-text border-theme-border" />
                     </div>
 
+                    {/* Category */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Category</label>
                         <select name="category" value={product.category} onChange={inputChangeHandler}
@@ -134,6 +173,7 @@ function AddProduct() {
                         </select>
                     </div>
 
+                    {/* Is Secret */}
                     <div>
                         <label className="flex items-center space-x-3">
                             <input
@@ -147,34 +187,36 @@ function AddProduct() {
                         </label>
                     </div>
 
+                    {/* Exchange / Sell toggle */}
                     <div>
-                        <label className="block text-sm font-semibold mb-2">The way your want to process your item</label>
+                        <label className="block text-sm font-semibold mb-2">The way you want to process your item</label>
                         <div className="flex items-center space-x-6">
-                                <div className="flex items-center space-x-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setProduct(prev => ({ ...prev, exchange: false }))}
-                                        className={`px-4 py-2 rounded-lg text-sm font-semibold border transition
+                            <div className="flex items-center space-x-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setProduct(prev => ({ ...prev, exchange: false }))}
+                                    className={`px-4 py-2 rounded-lg text-sm font-semibold border transition
                                         ${!product.exchange
-                                            ? 'bg-theme-primary text-white border-theme-primary'
-                                            : 'bg-white text-gray-700 border-theme-border hover:bg-gray-100'}`}
-                                    >
-                                        Sell
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setProduct(prev => ({ ...prev, exchange: true }))}
-                                        className={`px-4 py-2 rounded-lg text-sm font-semibold border transition
+                                        ? 'bg-theme-primary text-white border-theme-primary'
+                                        : 'bg-white text-gray-700 border-theme-border hover:bg-gray-100'}`}
+                                >
+                                    Sell
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setProduct(prev => ({ ...prev, exchange: true }))}
+                                    className={`px-4 py-2 rounded-lg text-sm font-semibold border transition
                                         ${product.exchange
-                                            ? 'bg-theme-primary text-white border-theme-primary'
-                                            : 'bg-white text-gray-700 border-theme-border hover:bg-gray-100'}`}
-                                    >
-                                        Exchange
-                                    </button>
-                                </div>
+                                        ? 'bg-theme-primary text-white border-theme-primary'
+                                        : 'bg-white text-gray-700 border-theme-border hover:bg-gray-100'}`}
+                                >
+                                    Exchange
+                                </button>
+                            </div>
                         </div>
                     </div>
 
+                    {/* Price / Want Item */}
                     {!product.exchange ? (
                         <div>
                             <label className="block text-sm font-semibold mb-2">Price</label>
@@ -202,6 +244,7 @@ function AddProduct() {
                         </div>
                     )}
 
+                    {/* Promotional Images */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Promotional Images</label>
                         <input type="file" multiple accept="image/*" onChange={handleImageChange}
@@ -223,6 +266,7 @@ function AddProduct() {
                         )}
                     </div>
 
+                    {/* Submit Button */}
                     <div className="pt-6">
                         <button type="submit"
                                 className="w-full py-3 bg-theme-primary text-white text-sm font-semibold rounded-lg hover:bg-theme-hover focus:outline-none">

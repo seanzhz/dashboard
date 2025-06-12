@@ -76,36 +76,36 @@ export const allNav = [
         id: 9,
         title: 'Market place',
         icon: <FiShoppingBag />,
-        role: 'seller',
-        path: '/seller/dashboard/market'
+        role: 'user',
+        path: '/market'
     },
 
     {
         id: 10,
         title: 'My Post',
         icon: <TbHorseToy />,
-        role: 'seller',
-        path: '/seller/dashboard/products'
+        role: 'user',
+        path: '/products'
     },
     {
         id: 11,
         title: 'Contact Customer',
         icon: <RiCustomerService2Fill />,
-        role: 'seller',
-        path: '/seller/dashboard/contact-customer'
+        role: 'user',
+        path: '/contact-customer'
     },
     {
         id: 12,
         title: 'Contact Admin',
         icon: <BiSolidContact />,
-        role: 'seller',
-        path: '/seller/dashboard/contact-admin'
+        role: 'user',
+        path: '/contact-admin'
     },
     {
         id: 13,
         title: 'Profile',
         icon: <ImProfile />,
-        role: 'seller',
-        path: '/seller/dashboard/profile'
+        role: 'user',
+        path: '/profile'
     }
 ];

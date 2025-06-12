@@ -3,20 +3,29 @@ import {Link, useNavigate} from "react-router-dom";
 import {FaFacebook, FaGoogle} from "react-icons/fa";
 import {useDispatch, useSelector} from "react-redux";
 import {PropagateLoader} from "react-spinners";
-import {messageClear, sellerRegister} from "../../store/Reducers/authReducer";
+import {messageClear, userRegister} from "../../store/Reducers/authReducer";
 import toast from "react-hot-toast";
 
+/**
+ * Register component
+ * User registration form with username, email, password, terms agreement.
+ */
 function Register() {
-
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
     const { loader, errorMessage, successMessage } = useSelector(state => state.auth);
+
+    // Local form state
     const [user, setUser] = React.useState({
         username: "",
         email: "",
         password: ""
     });
 
+    /**
+     * Generic input change handler.
+     */
     const inputChangeHandler = (e) => {
         setUser({
             ...user,
@@ -24,11 +33,17 @@ function Register() {
         });
     };
 
+    /**
+     * Form submit handler.
+     */
     const submitHandler = (e) => {
         e.preventDefault();
-        dispatch(sellerRegister(user));
+        dispatch(userRegister(user));
     };
 
+    /**
+     * Handle success/error toast after register.
+     */
     useEffect(() => {
         if (errorMessage) {
             toast.error(errorMessage);
@@ -39,7 +54,7 @@ function Register() {
             dispatch(messageClear());
             navigate('/login');
         }
-    }, [errorMessage, successMessage]);
+    }, [errorMessage, successMessage, dispatch, navigate]);
 
     return (
         <div className="flex justify-center items-center min-h-screen min-w-screen bg-theme-bg">
@@ -47,7 +62,9 @@ function Register() {
                 <h2 className="text-xl font-bold text-center mb-3 text-theme-text">Welcome to Swappy</h2>
                 <h2 className="text-l font-semibold text-center mb-3 text-theme-subtext">Register your account</h2>
 
+                {/* Register Form */}
                 <form className="space-y-4" onSubmit={submitHandler}>
+                    {/* Username */}
                     <div>
                         <label className="block text-theme-text text-sm font-semibold mb-1" htmlFor="username">
                             Community Name (Not changeable)
@@ -58,12 +75,13 @@ function Register() {
                             type="text"
                             name="username"
                             id="username"
-                            placeholder="Enter your prefrred name"
+                            placeholder="Enter your preferred name"
                             className="w-full border border-theme-border bg-theme-bgSecondary text-theme-text rounded px-3 py-2 focus:ring focus:border-theme-primary focus:bg-white"
                             required
                         />
                     </div>
 
+                    {/* Email */}
                     <div>
                         <label className="block text-theme-text text-sm font-semibold mb-1" htmlFor="email">
                             Email
@@ -79,6 +97,7 @@ function Register() {
                         />
                     </div>
 
+                    {/* Password */}
                     <div>
                         <label className="block text-theme-text text-sm font-semibold mb-1" htmlFor="password">
                             Password
@@ -94,6 +113,7 @@ function Register() {
                         />
                     </div>
 
+                    {/* Terms Agreement */}
                     <div>
                         <label className="inline-flex items-center">
                             <input
@@ -104,11 +124,12 @@ function Register() {
                             />
                             <span className="ml-2 text-sm text-theme-subtext">
                                 I agree to the
-                                <a href="" className="text-theme-primary underline ml-1">terms and conditions</a>
+                                <a href="#" className="text-theme-primary underline ml-1">terms and conditions</a>
                             </span>
                         </label>
                     </div>
 
+                    {/* Submit button */}
                     <button
                         type="submit"
                         className="w-full bg-theme-primary text-white py-2 px-4 rounded hover:bg-theme-hover transition"
@@ -121,14 +142,19 @@ function Register() {
                             <PropagateLoader color="#4f93ce" />
                         </div>
                     )}
+
                     <br/>
 
                     <hr className="my-4 border-theme-border" />
                     <p className="text-center text-theme-subtext">
-                        Already have an account? <Link className='font-bold text-theme-primary hover:underline' to='/login'>Login</Link>
+                        Already have an account?{" "}
+                        <Link className='font-bold text-theme-primary hover:underline' to='/login'>
+                            Login
+                        </Link>
                     </p>
                 </form>
 
+                {/* Social login */}
                 <div className="flex items-center my-4">
                     <hr className="flex-grow border-theme-border" />
                     <span className="mx-2 text-theme-subtext">OR</span>

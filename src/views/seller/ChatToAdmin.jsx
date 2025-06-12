@@ -1,44 +1,18 @@
 import React, { useState } from 'react';
 
+/**
+ * ChatToAdmin component
+ * Static contact page for contacting Admin with guidance and email link.
+ * Also includes local mock chat area (optional UI interaction).
+ */
 function ChatToAdmin() {
-    const chatContacts = [
-        { id: 1, name: 'Admin', lastMessage: 'Hi there!', time: '10:30 AM' },
-    ];
-
-    const initialMessages = {
-        1: [
-            { sender: 'Alice', content: 'Hi there!', time: '10:30 AM' },
-            { sender: 'You', content: 'Hello Alice!', time: '10:32 AM' },
-        ]
-    };
-
-    const [selectedContact, setSelectedContact] = useState(chatContacts[0]);
-    const [messages, setMessages] = useState(initialMessages[selectedContact.id] || []);
-    const [newMessage, setNewMessage] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
-
-    const filteredContacts = chatContacts.filter(contact =>
-        contact.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    const handleContactClick = (contact) => {
-        setSelectedContact(contact);
-        setMessages(initialMessages[contact.id] || []);
-    };
-
-    const handleSendMessage = () => {
-        if (newMessage.trim() === '') return;
-        const newMsg = { sender: 'You', content: newMessage, time: 'Now' };
-        setMessages([...messages, newMsg]);
-        setNewMessage('');
-    };
 
     return (
         <div className="px-2 lg:px-7 pt-5 text-theme-text">
             <h1 className="text-2xl font-bold mb-3">Admin Contact Detail</h1>
             <div className="w-full p-4 bg-theme-bgSecondary rounded-md border border-theme-border">
                 <div className="flex flex-col lg:flex-row h-[300px]">
-                    {/* Left side: guidance in English */}
+                    {/* Left side: guidance section */}
                     <div className="flex-1 p-6 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-theme-border">
                         <h2 className="text-xl font-semibold mb-4">Need Assistance?</h2>
                         <ul className="list-disc list-inside space-y-2 text-theme-subtext">

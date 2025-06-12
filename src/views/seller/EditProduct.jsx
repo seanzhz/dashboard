@@ -6,14 +6,22 @@ import {getCategory} from "../../store/Reducers/categoryReducer";
 import toast from "react-hot-toast";
 import {PropagateLoader} from "react-spinners";
 
+/**
+ * EditProduct component
+ * Allows admin to edit product details and images.
+ */
 function EditProduct() {
     const {productId} = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
     const {singleProduct, successMessage, errorMessage, loader} = useSelector(state => state.product);
     const {categories} = useSelector(state => state.category);
+
+    // Product images state (new + existing)
     const [productImages, setProductImages] = useState([]);
 
+    // Product form state
     const [product, setProduct] = useState({
         id: "",
         name: "",
@@ -28,11 +36,13 @@ function EditProduct() {
         promotionalImage: [],
     });
 
+    // Fetch product + categories on mount
     useEffect(() => {
         dispatch(getSingleProduct(productId));
         dispatch(getCategory());
     }, [dispatch, productId]);
 
+    // Sync singleProduct to form state
     useEffect(() => {
         if (singleProduct) {
             setProduct({
@@ -57,11 +67,12 @@ function EditProduct() {
         }
     }, [singleProduct]);
 
+    // Handle success/error toast
     useEffect(() => {
         if (successMessage) {
             toast.success(successMessage);
             dispatch(messageClear());
-            navigate(`/seller/dashboard/products/${productId}`);
+            navigate(`/products/${productId}`);
         }
         if (errorMessage) {
             toast.error(errorMessage);
@@ -69,6 +80,9 @@ function EditProduct() {
         }
     }, [successMessage, errorMessage, dispatch, navigate]);
 
+    /**
+     * Prevent invalid price inputs (max 2 decimal places)
+     */
     const priceCheck = (e) => {
         if (!/[0-9.]/.test(e.key) && !['Backspace', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
             e.preventDefault();
@@ -77,6 +91,9 @@ function EditProduct() {
         if (e.target.value.includes('.') && e.target.value.split('.')[1].length >= 2 && e.key !== 'Backspace') e.preventDefault();
     };
 
+    /**
+     * Generic input change handler
+     */
     const inputChangeHandler = (e) => {
         const {name, value, type, checked} = e.target;
         setProduct(prev => ({
@@ -85,8 +102,12 @@ function EditProduct() {
         }));
     };
 
+    /**
+     * Handle product update submission
+     */
     const handleUpload = (e) => {
         e.preventDefault();
+
         const formData = new FormData();
         Object.entries(product).forEach(([key, value]) => {
             if (key !== 'promotionalImage') {
@@ -94,6 +115,7 @@ function EditProduct() {
             }
         });
 
+        // Append images (new or existing)
         productImages.forEach(img => {
             if (img.file) {
                 formData.append('images', img.file);
@@ -111,6 +133,7 @@ function EditProduct() {
 
             <div className="w-full p-4 bg-theme-card border border-theme-border rounded-md shadow-sm">
                 <form className="space-y-6" onSubmit={handleUpload}>
+                    {/* Product ID */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Product ID</label>
                         <input
@@ -122,12 +145,14 @@ function EditProduct() {
                         />
                     </div>
 
+                    {/* Product Name */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Product Name</label>
                         <input type="text" name="name" value={product.name} onChange={inputChangeHandler}
                                className="w-full p-3 border rounded-lg bg-theme-bgSecondary text-theme-text border-theme-border"/>
                     </div>
 
+                    {/* Product Description */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Product Description</label>
                         <textarea name="description" value={product.description} onChange={inputChangeHandler}
@@ -135,12 +160,14 @@ function EditProduct() {
                                   rows="4"/>
                     </div>
 
+                    {/* Brand */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Brand</label>
                         <input type="text" name="brand" value={product.brand} onChange={inputChangeHandler}
                                className="w-full p-3 border rounded-lg bg-theme-bgSecondary text-theme-text border-theme-border"/>
                     </div>
 
+                    {/* Stock */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Stock</label>
                         <input type="number" name="stock" value={product.stock} onKeyDown={priceCheck}
@@ -148,6 +175,7 @@ function EditProduct() {
                                className="w-full p-3 border rounded-lg bg-theme-bgSecondary text-theme-text border-theme-border"/>
                     </div>
 
+                    {/* Category */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Category</label>
                         <select name="category" value={product.category} onChange={inputChangeHandler}
@@ -159,6 +187,7 @@ function EditProduct() {
                         </select>
                     </div>
 
+                    {/* Is Secret */}
                     <div>
                         <label className="flex items-center space-x-3">
                             <input type="checkbox" name="isSecret" checked={product.isSecret}
@@ -167,9 +196,9 @@ function EditProduct() {
                         </label>
                     </div>
 
+                    {/* Exchange / Sell toggle */}
                     <div>
-                        <label className="block text-sm font-semibold mb-2">The way you want to process your
-                            item</label>
+                        <label className="block text-sm font-semibold mb-2">The way you want to process your item</label>
                         <div className="flex items-center space-x-4">
                             <button type="button" onClick={() => setProduct(prev => ({...prev, exchange: false}))}
                                     className={`px-4 py-2 rounded-lg text-sm font-semibold border transition ${!product.exchange ? 'bg-theme-primary text-white border-theme-primary' : 'bg-white text-gray-700 border-theme-border hover:bg-gray-100'}`}>
@@ -182,6 +211,7 @@ function EditProduct() {
                         </div>
                     </div>
 
+                    {/* Price / Want Item */}
                     {!product.exchange ? (
                         <div>
                             <label className="block text-sm font-semibold mb-2">Price</label>
@@ -199,6 +229,7 @@ function EditProduct() {
                         </div>
                     )}
 
+                    {/* Promotional Images */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Promotional Images</label>
                         <input type="file" name="promotionalImages" multiple accept="image/*" onChange={(e) => {
@@ -224,8 +255,9 @@ function EditProduct() {
                         )}
                     </div>
 
+                    {/* Action Buttons */}
                     <div className="pt-6 flex justify-between items-center gap-4">
-                        <button type="button" onClick={() => navigate('/seller/dashboard/products')}
+                        <button type="button" onClick={() => navigate('/products')}
                                 className="w-1/2 py-3 bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-300 transition">
                             ← Back to Products
                         </button>
